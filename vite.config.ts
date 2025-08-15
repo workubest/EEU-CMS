@@ -15,6 +15,8 @@ export default defineConfig(({ mode }) => ({
       }
     }
   },
+  // Mobile-specific configurations
+  base: mode === 'production' ? '/' : '/',
   plugins: [
     react(),
   ],

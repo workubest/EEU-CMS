@@ -31,6 +31,8 @@ import {
   Bell
 } from 'lucide-react';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { ModernMobileDashboard } from '@/components/mobile/ModernMobileDashboard';
+import { useMobile } from '@/hooks/useMobile';
 
 
 
@@ -39,6 +41,12 @@ export function Dashboard() {
   const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isNative } = useMobile();
+
+  // Return modern mobile dashboard if on mobile
+  if (isNative) {
+    return <ModernMobileDashboard />;
+  }
   
   const {
     metrics,

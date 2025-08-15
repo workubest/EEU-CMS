@@ -116,10 +116,27 @@ export function ComplaintForm() {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      };
+      
+      // Reset service center when region changes
+      if (field === 'region') {
+        newData.serviceCenter = '';
+      }
+      
+      return newData;
+    });
+  };
+
+  // Filter service centers based on selected region
+  const getAvailableServiceCenters = () => {
+    if (!formData.region) {
+      return [];
+    }
+    return SERVICE_CENTERS.filter(center => center.startsWith(formData.region));
   };
 
   const availablePriorities = permissions.canSetHighPriority 
@@ -372,12 +389,22 @@ export function ComplaintForm() {
                         {t("form.service_center")} <span className="text-gray-500">(Optional)</span>
                       </Label>
                       <div className="relative">
-                        <Select value={formData.serviceCenter} onValueChange={(value) => handleInputChange('serviceCenter', value)}>
+                        <Select 
+                          value={formData.serviceCenter} 
+                          onValueChange={(value) => handleInputChange('serviceCenter', value)}
+                          disabled={!formData.region}
+                        >
                           <SelectTrigger className="pl-10 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg">
-                            <SelectValue placeholder={t("form.select_service_center")} />
+                            <SelectValue 
+                              placeholder={
+                                formData.region 
+                                  ? t("form.select_service_center") 
+                                  : "Select region first"
+                              } 
+                            />
                           </SelectTrigger>
                           <SelectContent>
-                            {SERVICE_CENTERS.map((center) => (
+                            {getAvailableServiceCenters().map((center) => (
                               <SelectItem key={center} value={center}>
                                 {center}
                               </SelectItem>

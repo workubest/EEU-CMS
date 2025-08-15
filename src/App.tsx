@@ -9,6 +9,9 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { DashboardProvider } from "@/contexts/DashboardContext";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { ModernMobileWrapper } from "@/components/mobile/ModernMobileWrapper";
+import { ModernMobileBottomNavigation, ModernMobileTopNavigation } from "@/components/mobile/ModernMobileNavigation";
+import { useMobile } from "@/hooks/useMobile";
 import { Suspense, lazy, memo } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -44,114 +47,118 @@ const LoadingSpinner = memo(() => (
 
 const AppRoutes = memo(() => {
   const { isAuthenticated } = useAuth();
+  const { isNative } = useMobile();
 
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/customer-portal" element={<CustomerPortal />} />
-        <Route path="/quick-report" element={<QuickReport />} />
-        <Route path="/login" element={<Login />} />
-
-        
-        {/* Redirect /notifications to /dashboard/notifications */}
-        <Route path="/notifications" element={<Navigate to="/dashboard/notifications" replace />} />
-        
-        {/* Protected Routes */}
-        {!isAuthenticated ? (
-          <Route path="/dashboard/*" element={<Login />} />
-        ) : (
-          <Route path="/dashboard/*" element={
-            <Layout>
-              <Suspense fallback={<LoadingSpinner />}>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route 
-                    path="/complaints/new" 
-                    element={
-                      <ProtectedRoute resource="complaints" action="create">
-                        <ComplaintForm />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/complaints/new-amharic" 
-                    element={
-                      <ProtectedRoute resource="complaints" action="create">
-                        <ComplaintFormAmharic />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/complaints" 
-                    element={
-                      <ProtectedRoute resource="complaints" action="read">
-                        <ComplaintsList />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/complaints/:id" 
-                    element={
-                      <ProtectedRoute resource="complaints" action="read">
-                        <ComplaintDetail />
-                      </ProtectedRoute>
-                    } 
-                  />
-
-                  <Route 
-                    path="/analytics" 
-                    element={
-                      <ProtectedRoute resource="reports" action="read">
-                        <Analytics />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/reports" 
-                    element={
-                      <ProtectedRoute resource="reports" action="read">
-                        <Reports />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/users" 
-                    element={
-                      <ProtectedRoute resource="users" action="read">
-                        <UserManagement />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route path="/notifications" element={<Notifications />} />
-                  <Route 
-                    path="/settings" 
-                    element={
-                      <ProtectedRoute resource="settings" action="read">
-                        <Settings />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/permissions" 
-                    element={
-                      <ProtectedRoute resource="settings" action="update">
-                        <PermissionManagement />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </Layout>
-          } />
-        )}
-        
-        {/* Fallback for unknown routes */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
+    <ModernMobileWrapper>
+      {isNative && <ModernMobileTopNavigation />}
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/customer-portal" element={<CustomerPortal />} />
+          <Route path="/quick-report" element={<QuickReport />} />
+          <Route path="/login" element={<Login />} />
+          
+          {/* Redirect /notifications to /dashboard/notifications */}
+          <Route path="/notifications" element={<Navigate to="/dashboard/notifications" replace />} />
+          
+          {/* Protected Routes */}
+          {!isAuthenticated ? (
+            <Route path="/dashboard/*" element={<Login />} />
+          ) : (
+            <Route path="/dashboard/*" element={
+              <Layout>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route 
+                      path="/complaints/new" 
+                      element={
+                        <ProtectedRoute resource="complaints" action="create">
+                          <ComplaintForm />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/complaints/new-amharic" 
+                      element={
+                        <ProtectedRoute resource="complaints" action="create">
+                          <ComplaintFormAmharic />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/complaints" 
+                      element={
+                        <ProtectedRoute resource="complaints" action="read">
+                          <ComplaintsList />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/complaints/:id" 
+                      element={
+                        <ProtectedRoute resource="complaints" action="read">
+                          <ComplaintDetail />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/analytics" 
+                      element={
+                        <ProtectedRoute resource="reports" action="read">
+                          <Analytics />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/reports" 
+                      element={
+                        <ProtectedRoute resource="reports" action="read">
+                          <Reports />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/users" 
+                      element={
+                        <ProtectedRoute resource="users" action="read">
+                          <UserManagement />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route path="/notifications" element={<Notifications />} />
+                    <Route 
+                      path="/settings" 
+                      element={
+                        <ProtectedRoute resource="settings" action="read">
+                          <Settings />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/permissions" 
+                      element={
+                        <ProtectedRoute resource="settings" action="update">
+                          <PermissionManagement />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </Layout>
+            } />
+          )}
+          
+          {/* Fallback for unknown routes */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+      {isNative && <ModernMobileBottomNavigation />}
+      {isNative && <div className="h-20" />}
+    </ModernMobileWrapper>
   );
 });
 

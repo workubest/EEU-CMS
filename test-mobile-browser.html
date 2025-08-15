@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EEU Mobile App - Browser Test</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f0f0;
+        }
+        .mobile-simulator {
+            width: 375px;
+            height: 812px;
+            margin: 20px auto;
+            background: #000;
+            border-radius: 25px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .mobile-screen {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            background: white;
+            position: relative;
+        }
+        .mobile-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 20px;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+        .control-btn {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .control-btn:hover {
+            background: #0051D2;
+        }
+        .info {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .device-selector {
+            margin: 10px;
+        }
+        select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>📱 EEU Mobile App - Browser Testing</h1>
+        <p>This page simulates your Android app in a mobile viewport. Use the controls below to test different scenarios.</p>
+        
+        <div class="device-selector">
+            <label for="device">Device Size:</label>
+            <select id="device" onchange="changeDevice()">
+                <option value="375x812">iPhone 12 Pro (375x812)</option>
+                <option value="360x800">Android Phone (360x800)</option>
+                <option value="414x896">iPhone 11 Pro Max (414x896)</option>
+                <option value="393x851">Pixel 5 (393x851)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="mobile-simulator" id="simulator">
+        <div class="mobile-screen">
+            <iframe id="app-frame" class="mobile-frame" src="http://localhost:8080"></iframe>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" onclick="reload()">🔄 Reload App</button>
+        <button class="control-btn" onclick="toggleDevTools()">🔧 Dev Tools</button>
+        <button class="control-btn" onclick="testOffline()">📡 Test Offline</button>
+        <button class="control-btn" onclick="simulateTouch()">👆 Simulate Touch</button>
+    </div>
+
+    <div class="info">
+        <h3>🧪 Testing Instructions:</h3>
+        <ol>
+            <li><strong>Start Dev Server:</strong> Run <code>npm run dev</code> in your project</li>
+            <li><strong>Open This File:</strong> Open this HTML file in your browser</li>
+            <li><strong>Test Mobile Features:</strong> The app will detect it's running in mobile viewport</li>
+            <li><strong>Use Dev Tools:</strong> Press F12 to inspect mobile-specific CSS</li>
+        </ol>
+
+        <h3>📱 What You Can Test:</h3>
+        <ul>
+            <li>✅ Mobile navigation (bottom tabs)</li>
+            <li>✅ Touch interactions and gestures</li>
+            <li>✅ Responsive design on different screen sizes</li>
+            <li>✅ Mobile-optimized forms and inputs</li>
+            <li>✅ Loading states and transitions</li>
+        </ul>
+
+        <h3>🔗 Online Testing Platforms:</h3>
+        <p>For more advanced testing, try these online platforms:</p>
+        <ul>
+            <li><strong>BrowserStack:</strong> <a href="https://www.browserstack.com/live" target="_blank">Real device testing</a></li>
+            <li><strong>Sauce Labs:</strong> <a href="https://saucelabs.com/" target="_blank">Cross-browser testing</a></li>
+            <li><strong>LambdaTest:</strong> <a href="https://www.lambdatest.com/" target="_blank">Live interactive testing</a></li>
+        </ul>
+    </div>
+
+    <script>
+        function changeDevice() {
+            const device = document.getElementById('device').value;
+            const [width, height] = device.split('x');
+            const simulator = document.getElementById('simulator');
+            simulator.style.width = width + 'px';
+            simulator.style.height = height + 'px';
+        }
+
+        function reload() {
+            document.getElementById('app-frame').src = document.getElementById('app-frame').src;
+        }
+
+        function toggleDevTools() {
+            alert('Press F12 to open DevTools, then click the device icon to simulate mobile');
+        }
+
+        function testOffline() {
+            // Simulate offline by blocking network
+            if (navigator.onLine) {
+                alert('To test offline: Open DevTools > Network tab > Check "Offline"');
+            }
+        }
+
+        function simulateTouch() {
+            alert('In DevTools: Settings > Experiments > Enable "Touch" > Restart DevTools');
+        }
+
+        // Auto-detect if dev server is running
+        window.onload = function() {
+            const frame = document.getElementById('app-frame');
+            frame.onerror = function() {
+                frame.innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: #666;">
+                        <h3>⚠️ Dev Server Not Running</h3>
+                        <p>Run <code>npm run dev</code> in your project directory</p>
+                        <p>Then refresh this page</p>
+                    </div>
+                `;
+            };
+        };
+    </script>
+</body>
+</html>

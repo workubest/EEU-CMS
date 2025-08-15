@@ -79,35 +79,41 @@ export const COMPLAINT_TITLES = {
 };
 
 export const REGIONS = [
-  'Addis Ababa',
-  'Afar',
-  'Amhara',
-  'Benishangul-Gumuz',
-  'Dire Dawa',
-  'Gambela',
-  'Harari',
-  'Oromia',
-  'Sidama',
-  'SNNPR',
-  'Somali',
-  'Tigray'
+  'NAAR',
+  'SAAR',
+  'EAAR',
+  'WAAR'
 ];
 
 export const SERVICE_CENTERS = [
   'NAAR No.1',
-  'NAAR No.2', 
+  'NAAR No.2',
+  'NAAR No.3',
+  'NAAR No.4',
+  'NAAR No.5',
+  'NAAR No.6',
+  'NAAR No.7',
   'SAAR No.1',
   'SAAR No.2',
+  'SAAR No.3',
+  'SAAR No.4',
+  'SAAR No.5',
+  'SAAR No.6',
+  'SAAR No.7',
   'EAAR No.1',
   'EAAR No.2',
+  'EAAR No.3',
+  'EAAR No.4',
+  'EAAR No.5',
+  'EAAR No.6',
+  'EAAR No.7',
   'WAAR No.1',
   'WAAR No.2',
-  'Regional Office',
-  'Customer Service Center',
-  'Field Operations',
-  'Technical Support',
-  'Billing Department',
-  'Emergency Response'
+  'WAAR No.3',
+  'WAAR No.4',
+  'WAAR No.5',
+  'WAAR No.6',
+  'WAAR No.7'
 ];
 
 export const ETHIOPIAN_REGIONS = REGIONS;
