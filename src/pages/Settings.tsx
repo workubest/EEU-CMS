@@ -78,36 +78,67 @@ export function Settings() {
   const [loading, setLoading] = useState(true);
 
 
-  // Load settings and permissions on component mount
+  // Load settings from API or local storage on component mount
   React.useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch settings
-        const settingsResult = await apiService.getSettings();
-        if (settingsResult.success && settingsResult.data) {
-          setSettings(prevSettings => ({
-            ...prevSettings,
-            ...settingsResult.data
-          }));
+        // Try to load from backend first
+        try {
+          const settingsResult = await apiService.getSettings();
+          if (settingsResult.success && settingsResult.data) {
+            setSettings(prevSettings => ({
+              ...prevSettings,
+              ...settingsResult.data
+            }));
+            toast({
+              title: "Settings Loaded",
+              description: "Settings loaded from backend.",
+            });
+            return;
+          }
+        } catch (backendError) {
+          console.log('Backend load failed, trying local storage:', backendError);
         }
-
+        
+        // Fallback to local storage
+        const localSettings = localStorage.getItem('eeu_system_settings');
+        if (localSettings) {
+          try {
+            const parsedSettings = JSON.parse(localSettings);
+            setSettings(prevSettings => ({
+              ...prevSettings,
+              ...parsedSettings
+            }));
+            toast({
+              title: "Settings Loaded",
+              description: "Settings loaded from local storage.",
+            });
+            return;
+          } catch (parseError) {
+            console.error('Error parsing local settings:', parseError);
+          }
+        }
+        
+        // Use defaults
+        toast({
+          title: "Default Settings",
+          description: "Using default system settings.",
+        });
 
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
-          title: "Error",
-          description: "Failed to load settings and permissions",
-          variant: "destructive"
+          title: "Info",
+          description: "Using default settings values.",
         });
-
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [toast]);
 
 
 

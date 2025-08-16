@@ -33,11 +33,15 @@ import {
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { ModernMobileDashboard } from '@/components/mobile/ModernMobileDashboard';
 import { useMobile } from '@/hooks/useMobile';
+import { useDataSync } from '@/hooks/useDataSync';
+import { DataSyncIndicator, OfflineBanner } from '@/components/mobile/DataSyncIndicator';
+import { enhancedApiService } from '@/lib/api-enhanced';
 
 
 
 export function Dashboard() {
   const { user, role, region } = useAuth();
+  const { syncStatus, forceRefresh } = useDataSync();
   const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -116,6 +120,9 @@ export function Dashboard() {
         </div>
         
         <div className="flex items-center space-x-2">
+          {/* Data Sync Indicator */}
+          <DataSyncIndicator />
+          
           {/* Notifications Indicator */}
           <Button
             variant="outline"
@@ -138,10 +145,10 @@ export function Dashboard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleRefresh}
-            disabled={metricsLoading}
+            onClick={forceRefresh}
+            disabled={syncStatus.isLoading}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${metricsLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${syncStatus.isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Button

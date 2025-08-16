@@ -24,7 +24,7 @@ const proxyUrl = isPort8080 ? 'http://localhost:3001/api' : 'http://localhost:30
 // Check if we should force real backend in development (set VITE_FORCE_REAL_BACKEND=true)
 const forceRealBackend = import.meta.env.VITE_FORCE_REAL_BACKEND === 'true';
 
-// Disable demo mode - use live backend data
+// Disable demo mode - use only live backend data as requested
 const forceDemoMode = false;
 
 // Environment-specific configuration
@@ -32,7 +32,7 @@ export const environment: EnvironmentConfig = {
   isProduction,
   isDevelopment,
   googleAppsScriptUrl: GOOGLE_APPS_SCRIPT_URL,
-  // Use direct Google Apps Script URL for both development and production for better reliability
+  // Use direct Google Apps Script URL (we'll handle CORS differently)
   apiBaseUrl: GOOGLE_APPS_SCRIPT_URL,
   forceRealBackend: true,
   forceDemoMode: false

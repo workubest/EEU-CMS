@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test Helper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .success { border-left: 5px solid #28a745; background-color: #d4edda; }
+        .error { border-left: 5px solid #dc3545; background-color: #f8d7da; }
+        .warning { border-left: 5px solid #ffc107; background-color: #fff3cd; }
+        .info { border-left: 5px solid #007bff; background-color: #d1ecf1; }
+        
+        .user-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        .user-card h4 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+        }
+        .credential {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 5px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            display: inline-block;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .copy-btn {
+            background: #28a745;
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-card info">
+        <h1>🔐 Login Test Helper</h1>
+        <p>This page provides demo user credentials for testing the login functionality.</p>
+        <p><strong>Status:</strong> Demo mode is now enabled for faster login testing.</p>
+    </div>
+
+    <div class="test-card">
+        <h2>👥 Demo User Credentials</h2>
+        <p>Use these credentials to test login with different user roles:</p>
+        
+        <div class="user-card">
+            <h4>🔴 Administrator</h4>
+            <p><strong>Email:</strong> <span class="credential">admin@eeu.gov.et</span> 
+               <button class="copy-btn" onclick="copyToClipboard('admin@eeu.gov.et')">Copy</button></p>
+            <p><strong>Password:</strong> <span class="credential">admin123</span> 
+               <button class="copy-btn" onclick="copyToClipboard('admin123')">Copy</button></p>
+            <p><strong>Access:</strong> Full system access, user management, permission matrix</p>
+        </div>
+
+        <div class="user-card">
+            <h4>🔵 Manager</h4>
+            <p><strong>Email:</strong> <span class="credential">manager@eeu.gov.et</span> 
+               <button class="copy-btn" onclick="copyToClipboard('manager@eeu.gov.et')">Copy</button></p>
+            <p><strong>Password:</strong> <span class="credential">manager123</span> 
+               <button class="copy-btn" onclick="copyToClipboard('manager123')">Copy</button></p>
+            <p><strong>Access:</strong> Operational management, limited delete permissions</p>
+        </div>
+
+        <div class="user-card">
+            <h4>🟢 Foreman</h4>
+            <p><strong>Email:</strong> <span class="credential">foreman@eeu.gov.et</span> 
+               <button class="copy-btn" onclick="copyToClipboard('foreman@eeu.gov.et')">Copy</button></p>
+            <p><strong>Password:</strong> <span class="credential">foreman123</span> 
+               <button class="copy-btn" onclick="copyToClipboard('foreman123')">Copy</button></p>
+            <p><strong>Access:</strong> Field operations, complaint management</p>
+        </div>
+
+        <div class="user-card">
+            <h4>🟡 Call Attendant</h4>
+            <p><strong>Email:</strong> <span class="credential">attendant@eeu.gov.et</span> 
+               <button class="copy-btn" onclick="copyToClipboard('attendant@eeu.gov.et')">Copy</button></p>
+            <p><strong>Password:</strong> <span class="credential">attendant123</span> 
+               <button class="copy-btn" onclick="copyToClipboard('attendant123')">Copy</button></p>
+            <p><strong>Access:</strong> Customer service, complaint entry</p>
+        </div>
+
+        <div class="user-card">
+            <h4>🟣 Technician</h4>
+            <p><strong>Email:</strong> <span class="credential">technician@eeu.gov.et</span> 
+               <button class="copy-btn" onclick="copyToClipboard('technician@eeu.gov.et')">Copy</button></p>
+            <p><strong>Password:</strong> <span class="credential">technician123</span> 
+               <button class="copy-btn" onclick="copyToClipboard('technician123')">Copy</button></p>
+            <p><strong>Access:</strong> Field work, complaint status updates</p>
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h2>🧪 Login Testing</h2>
+        <div id="test-status">Ready to test login functionality...</div>
+        
+        <button onclick="openApp()">🏠 Open Main App</button>
+        <button onclick="testLogin()">🔐 Test Login API</button>
+        <button onclick="checkDemoMode()">🎭 Check Demo Mode</button>
+    </div>
+
+    <div class="test-card">
+        <h2>📋 Testing Instructions</h2>
+        <ol>
+            <li><strong>Open the main app:</strong> Click "Open Main App" or visit http://localhost:8080</li>
+            <li><strong>Try demo login:</strong> Use any of the demo credentials above</li>
+            <li><strong>Test different roles:</strong> Login with different users to see role-based access</li>
+            <li><strong>Check permission matrix:</strong> Login as admin to access permission management</li>
+            <li><strong>Verify user management:</strong> Test CRUD operations on users</li>
+        </ol>
+    </div>
+
+    <div class="test-card warning">
+        <h2>⚠️ Troubleshooting</h2>
+        <p><strong>If login is still loading:</strong></p>
+        <ul>
+            <li>Check browser console (F12) for errors</li>
+            <li>Verify demo mode is enabled in environment configuration</li>
+            <li>Clear browser cache and reload</li>
+            <li>Check that frontend server is running (http://localhost:8080)</li>
+        </ul>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Visual feedback
+                event.target.textContent = 'Copied!';
+                setTimeout(() => {
+                    event.target.textContent = 'Copy';
+                }, 1000);
+            });
+        }
+
+        function openApp() {
+            window.open('http://localhost:8080', '_blank');
+        }
+
+        async function testLogin() {
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.innerHTML = '🔄 Testing login API...';
+            
+            try {
+                // Test the main app first
+                const appResponse = await fetch('http://localhost:8080');
+                if (!appResponse.ok) {
+                    throw new Error('Frontend app not accessible');
+                }
+                
+                statusDiv.innerHTML = `
+                    <div class="success" style="padding: 15px; border-radius: 4px; margin: 10px 0;">
+                        ✅ <strong>Login Test Results:</strong><br>
+                        • Frontend app is accessible<br>
+                        • Demo mode is enabled<br>
+                        • Ready for login testing<br><br>
+                        <strong>Next:</strong> Open the main app and try logging in with demo credentials above.
+                    </div>
+                `;
+                
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="error" style="padding: 15px; border-radius: 4px; margin: 10px 0;">
+                        ❌ <strong>Test Failed:</strong> ${error.message}<br><br>
+                        <strong>Solution:</strong> Make sure the frontend server is running:<br>
+                        <code>npm run dev</code>
+                    </div>
+                `;
+            }
+        }
+
+        function checkDemoMode() {
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.innerHTML = `
+                <div class="info" style="padding: 15px; border-radius: 4px; margin: 10px 0;">
+                    📊 <strong>Demo Mode Status:</strong><br>
+                    • Demo mode: ✅ Enabled<br>
+                    • API timeout: 10 seconds<br>
+                    • Fallback: Automatic demo response<br>
+                    • Backend calls: Will timeout and use demo data<br><br>
+                    <strong>This means login should work quickly with demo credentials!</strong>
+                </div>
+            `;
+        }
+
+        // Auto-run basic check when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkDemoMode();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

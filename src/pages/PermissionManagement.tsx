@@ -191,29 +191,58 @@ export default function PermissionManagement() {
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState<string>('administrator');
 
-  // Load permissions from API on component mount
+  // Load permissions from API or local storage on component mount
   useEffect(() => {
     const loadPermissions = async () => {
       try {
         setLoading(true);
-        const result = await apiService.getPermissionMatrix();
         
-        if (result.success && result.data && isValidPermissionMatrix(result.data)) {
-          setPermissionMatrix(result.data);
-        } else {
-          // If no permissions exist or invalid structure, keep defaults
-          console.log('No valid permissions found, using defaults');
-          toast({
-            title: "Info",
-            description: "Using default permission settings.",
-          });
+        // Try to load from backend first
+        try {
+          const result = await apiService.getPermissionMatrix();
+          
+          if (result.success && result.data && isValidPermissionMatrix(result.data)) {
+            setPermissionMatrix(result.data);
+            toast({
+              title: "Permissions Loaded",
+              description: "Permissions loaded from backend.",
+            });
+            return;
+          }
+        } catch (backendError) {
+          console.log('Backend load failed, trying local storage:', backendError);
         }
+        
+        // Fallback to local storage
+        const localPermissions = localStorage.getItem('eeu_permission_matrix');
+        if (localPermissions) {
+          try {
+            const parsedPermissions = JSON.parse(localPermissions);
+            if (isValidPermissionMatrix(parsedPermissions)) {
+              setPermissionMatrix(parsedPermissions);
+              toast({
+                title: "Permissions Loaded",
+                description: "Permissions loaded from local storage.",
+              });
+              return;
+            }
+          } catch (parseError) {
+            console.error('Error parsing local permissions:', parseError);
+          }
+        }
+        
+        // Use defaults if nothing else works
+        console.log('No valid permissions found, using defaults');
+        toast({
+          title: "Default Permissions",
+          description: "Using default permission settings.",
+        });
+        
       } catch (error) {
         console.error('Error loading permissions:', error);
         toast({
-          title: "Warning",
-          description: "Could not load saved permissions. Using default values.",
-          variant: "destructive"
+          title: "Info", 
+          description: "Using default permission values.",
         });
       } finally {
         setLoading(false);
@@ -328,23 +357,38 @@ export default function PermissionManagement() {
     try {
       setLoading(true);
       
-      // Save to backend using API service
-      const result = await apiService.updatePermissionMatrix(permissionMatrix);
-      
-      if (result.success) {
-        setIsDirty(false);
-        toast({
-          title: "Permissions Updated",
-          description: "Role permissions have been saved successfully.",
-        });
-      } else {
-        throw new Error(result.error || 'Failed to save permissions');
+      // Try to save to backend, but use local storage as fallback
+      try {
+        const result = await apiService.updatePermissionMatrix(permissionMatrix);
+        
+        if (result.success) {
+          // Backend save successful
+          localStorage.setItem('eeu_permission_matrix', JSON.stringify(permissionMatrix));
+          setIsDirty(false);
+          toast({
+            title: "Permissions Updated",
+            description: "Role permissions have been saved successfully to backend.",
+          });
+          return;
+        }
+      } catch (backendError) {
+        console.log('Backend save failed, using local storage:', backendError);
       }
+      
+      // Fallback to local storage
+      localStorage.setItem('eeu_permission_matrix', JSON.stringify(permissionMatrix));
+      setIsDirty(false);
+      toast({
+        title: "Permissions Saved Locally",
+        description: "Permissions saved to local storage. Changes will persist in your browser.",
+        variant: "default"
+      });
+      
     } catch (error) {
       console.error('Error saving permissions:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save permissions. Please try again.",
+        description: "Failed to save permissions. Please try again.",
         variant: "destructive"
       });
     } finally {

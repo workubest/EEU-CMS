@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permission Matrix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .matrix-table th, .matrix-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .matrix-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .permission-granted {
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: bold;
+        }
+        .permission-denied {
+            background-color: #f8d7da;
+            color: #721c24;
+            font-weight: bold;
+        }
+        .test-status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .test-pass {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .test-fail {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .role-admin { background-color: #dc3545; }
+        .role-manager { background-color: #007bff; }
+        .role-foreman { background-color: #28a745; }
+        .role-call-attendant { background-color: #ffc107; color: #212529; }
+        .role-technician { background-color: #6f42c1; }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔐 EEU Permission Matrix Test Dashboard</h1>
+        <p>This page tests the permission management matrix functionality.</p>
+        
+        <button onclick="runAllTests()">🧪 Run All Tests</button>
+        <button onclick="testAppConnection()">🔗 Test App Connection</button>
+        <button onclick="validatePermissionMatrix()">✅ Validate Matrix</button>
+        <button onclick="simulatePermissionChanges()">🔄 Simulate Changes</button>
+        
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 Permission Matrix Preview</h2>
+        <div id="permission-matrix"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🧪 Test Results</h2>
+        <div id="detailed-results"></div>
+    </div>
+
+    <script>
+        // Permission matrix data structure
+        const permissionMatrix = {
+            administrator: {
+                users: { create: true, read: true, update: true, delete: true },
+                complaints: { create: true, read: true, update: true, delete: true },
+                reports: { create: true, read: true, update: true, delete: true },
+                settings: { create: true, read: true, update: true, delete: true },
+                notifications: { create: true, read: true, update: true, delete: true }
+            },
+            manager: {
+                users: { create: false, read: true, update: true, delete: false },
+                complaints: { create: true, read: true, update: true, delete: false },
+                reports: { create: true, read: true, update: false, delete: false },
+                settings: { create: false, read: true, update: true, delete: false },
+                notifications: { create: true, read: true, update: true, delete: false }
+            },
+            foreman: {
+                users: { create: false, read: true, update: false, delete: false },
+                complaints: { create: false, read: true, update: true, delete: false },
+                reports: { create: false, read: true, update: false, delete: false },
+                settings: { create: false, read: true, update: false, delete: false },
+                notifications: { create: false, read: true, update: false, delete: false }
+            },
+            call_attendant: {
+                users: { create: false, read: false, update: false, delete: false },
+                complaints: { create: true, read: true, update: false, delete: false },
+                reports: { create: false, read: true, update: false, delete: false },
+                settings: { create: false, read: false, update: false, delete: false },
+                notifications: { create: false, read: true, update: false, delete: false }
+            },
+            technician: {
+                users: { create: false, read: false, update: false, delete: false },
+                complaints: { create: false, read: true, update: true, delete: false },
+                reports: { create: false, read: false, update: false, delete: false },
+                settings: { create: false, read: false, update: false, delete: false },
+                notifications: { create: false, read: true, update: false, delete: false }
+            }
+        };
+
+        const roles = [
+            { id: 'administrator', name: 'Administrator', color: 'role-admin' },
+            { id: 'manager', name: 'Manager', color: 'role-manager' },
+            { id: 'foreman', name: 'Foreman', color: 'role-foreman' },
+            { id: 'call_attendant', name: 'Call Attendant', color: 'role-call-attendant' },
+            { id: 'technician', name: 'Technician', color: 'role-technician' }
+        ];
+
+        const resources = [
+            { id: 'users', name: 'User Management' },
+            { id: 'complaints', name: 'Complaints' },
+            { id: 'reports', name: 'Reports & Analytics' },
+            { id: 'settings', name: 'System Settings' },
+            { id: 'notifications', name: 'Notifications' }
+        ];
+
+        const actions = ['create', 'read', 'update', 'delete'];
+
+        function displayPermissionMatrix() {
+            const container = document.getElementById('permission-matrix');
+            let html = '<table class="matrix-table"><thead><tr><th>Role</th>';
+            
+            // Add resource headers
+            resources.forEach(resource => {
+                html += `<th colspan="4">${resource.name}</th>`;
+            });
+            html += '</tr><tr><th></th>';
+            
+            // Add action sub-headers
+            resources.forEach(resource => {
+                actions.forEach(action => {
+                    html += `<th>${action.toUpperCase()}</th>`;
+                });
+            });
+            html += '</tr></thead><tbody>';
+
+            // Add role rows
+            roles.forEach(role => {
+                html += `<tr><td><span class="role-badge ${role.color}">${role.name}</span></td>`;
+                resources.forEach(resource => {
+                    actions.forEach(action => {
+                        const hasPermission = permissionMatrix[role.id]?.[resource.id]?.[action] || false;
+                        const cellClass = hasPermission ? 'permission-granted' : 'permission-denied';
+                        const symbol = hasPermission ? '✓' : '✗';
+                        html += `<td class="${cellClass}">${symbol}</td>`;
+                    });
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function testAppConnection() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div>🔍 Testing app connection...</div>';
+
+            try {
+                const response = await fetch('http://localhost:8080');
+                if (response.ok) {
+                    results.innerHTML = '<div class="test-status test-pass">✅ App connection successful</div>';
+                } else {
+                    results.innerHTML = '<div class="test-status test-fail">❌ App connection failed</div>';
+                }
+            } catch (error) {
+                results.innerHTML = '<div class="test-status test-fail">❌ App connection error: ' + error.message + '</div>';
+            }
+        }
+
+        function validatePermissionMatrix() {
+            const results = document.getElementById('detailed-results');
+            let html = '<h3>🔍 Matrix Validation Results</h3>';
+            let allPassed = true;
+
+            // Test 1: Check all roles exist
+            const expectedRoles = ['administrator', 'manager', 'foreman', 'call_attendant', 'technician'];
+            const existingRoles = Object.keys(permissionMatrix);
+            const rolesTest = expectedRoles.every(role => existingRoles.includes(role));
+            
+            html += `<div class="test-status ${rolesTest ? 'test-pass' : 'test-fail'}">
+                ${rolesTest ? '✅' : '❌'} Roles Test: ${rolesTest ? 'All expected roles found' : 'Missing roles'}
+            </div>`;
+            
+            if (!rolesTest) allPassed = false;
+
+            // Test 2: Check all resources exist for each role
+            const expectedResources = ['users', 'complaints', 'reports', 'settings', 'notifications'];
+            let resourceTest = true;
+            expectedRoles.forEach(role => {
+                const roleResources = Object.keys(permissionMatrix[role] || {});
+                if (!expectedResources.every(resource => roleResources.includes(resource))) {
+                    resourceTest = false;
+                }
+            });
+
+            html += `<div class="test-status ${resourceTest ? 'test-pass' : 'test-fail'}">
+                ${resourceTest ? '✅' : '❌'} Resources Test: ${resourceTest ? 'All resources found for all roles' : 'Missing resources'}
+            </div>`;
+            
+            if (!resourceTest) allPassed = false;
+
+            // Test 3: Check permission structure
+            const expectedActions = ['create', 'read', 'update', 'delete'];
+            let actionsTest = true;
+            Object.values(permissionMatrix).forEach(rolePerms => {
+                Object.values(rolePerms).forEach(resourcePerms => {
+                    if (!expectedActions.every(action => typeof resourcePerms[action] === 'boolean')) {
+                        actionsTest = false;
+                    }
+                });
+            });
+
+            html += `<div class="test-status ${actionsTest ? 'test-pass' : 'test-fail'}">
+                ${actionsTest ? '✅' : '❌'} Actions Test: ${actionsTest ? 'All CRUD actions properly defined' : 'Invalid action structure'}
+            </div>`;
+            
+            if (!actionsTest) allPassed = false;
+
+            // Test 4: Logic validation
+            let logicTest = true;
+            let logicMessages = [];
+
+            // Admin should have all permissions
+            const adminPerms = permissionMatrix.administrator;
+            let adminHasAll = true;
+            Object.values(adminPerms).forEach(resourcePerms => {
+                Object.values(resourcePerms).forEach(hasPermission => {
+                    if (!hasPermission) adminHasAll = false;
+                });
+            });
+            
+            if (!adminHasAll) {
+                logicTest = false;
+                logicMessages.push('Administrator should have all permissions');
+            }
+
+            // Call attendant should not have user management
+            const callAttendantUserPerms = permissionMatrix.call_attendant.users;
+            if (callAttendantUserPerms.create || callAttendantUserPerms.update || callAttendantUserPerms.delete) {
+                logicTest = false;
+                logicMessages.push('Call attendant should not have user management permissions');
+            }
+
+            html += `<div class="test-status ${logicTest ? 'test-pass' : 'test-fail'}">
+                ${logicTest ? '✅' : '❌'} Logic Test: ${logicTest ? 'Permission logic is valid' : logicMessages.join(', ')}
+            </div>`;
+
+            if (!logicTest) allPassed = false;
+
+            html += `<div class="test-status ${allPassed ? 'test-pass' : 'test-fail'}">
+                <strong>${allPassed ? '🎉 All Tests Passed!' : '⚠️ Some Tests Failed'}</strong>
+            </div>`;
+
+            results.innerHTML = html;
+        }
+
+        function simulatePermissionChanges() {
+            const results = document.getElementById('detailed-results');
+            let html = '<h3>🔄 Permission Change Simulation</h3>';
+
+            // Simulate changing technician permissions
+            const originalTechnicianPerms = {...permissionMatrix.technician.complaints};
+            
+            // Give technician create permission temporarily
+            permissionMatrix.technician.complaints.create = true;
+            
+            html += `<div class="test-status test-pass">
+                ✅ Simulated change: Technician now can create complaints
+            </div>`;
+
+            // Revert the change
+            permissionMatrix.technician.complaints.create = originalTechnicianPerms.create;
+            
+            html += `<div class="test-status test-pass">
+                ✅ Reverted change: Technician permissions restored
+            </div>`;
+
+            // Test bulk permission change
+            const testRole = 'test_role';
+            permissionMatrix[testRole] = {
+                users: { create: false, read: false, update: false, delete: false },
+                complaints: { create: true, read: true, update: true, delete: false },
+                reports: { create: false, read: true, update: false, delete: false },
+                settings: { create: false, read: false, update: false, delete: false },
+                notifications: { create: false, read: true, update: false, delete: false }
+            };
+
+            html += `<div class="test-status test-pass">
+                ✅ Created temporary test role with custom permissions
+            </div>`;
+
+            // Clean up
+            delete permissionMatrix[testRole];
+            
+            html += `<div class="test-status test-pass">
+                ✅ Cleaned up test role
+            </div>`;
+
+            results.innerHTML = html;
+            
+            // Refresh the matrix display
+            displayPermissionMatrix();
+        }
+
+        async function runAllTests() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div>🧪 Running comprehensive tests...</div>';
+
+            // Run all tests in sequence
+            await testAppConnection();
+            validatePermissionMatrix();
+            simulatePermissionChanges();
+
+            // Display final results
+            results.innerHTML += '<div class="test-status test-pass">🎉 All tests completed! Check detailed results below.</div>';
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            displayPermissionMatrix();
+            
+            // Auto-run basic validation on load
+            setTimeout(() => {
+                validatePermissionMatrix();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

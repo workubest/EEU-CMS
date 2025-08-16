@@ -107,21 +107,7 @@ export function Notifications() {
     return configs[priority] || { label: 'Unknown', className: 'bg-muted text-muted-foreground' };
   };
 
-  const markAsRead = (notificationId: string) => {
-    setNotifications(notifications.map(notification =>
-      notification.id === notificationId
-        ? { ...notification, isRead: true }
-        : notification
-    ));
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(notification => ({ ...notification, isRead: true })));
-  };
-
-  const deleteNotification = (notificationId: string) => {
-    setNotifications(notifications.filter(notification => notification.id !== notificationId));
-  };
+  // Remove duplicate local functions since we use DashboardContext functions
 
   const filteredNotifications = notifications.filter(notification => {
     if (filter === 'unread') return !notification.isRead;

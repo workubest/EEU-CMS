@@ -60,6 +60,10 @@ class ApiService {
       return this.getDemoResponse<T>(endpoint, options);
     }
     
+    // Add timeout controller for all requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for large data
+    
     try {
       let url: string;
       let fetchOptions: RequestInit;
@@ -73,6 +77,7 @@ class ApiService {
             'Content-Type': 'application/json',
           },
           mode: 'cors',
+          signal: controller.signal,
         };
         
         if (options.body) {
@@ -143,6 +148,7 @@ class ApiService {
       }
       
       const response = await fetch(url, fetchOptions);
+      clearTimeout(timeoutId); // Clear timeout on successful response
 
       console.log('Response status:', response.status);
       console.log('Response headers:', [...response.headers.entries()]);
@@ -168,11 +174,14 @@ class ApiService {
       return data;
     } catch (error) {
       console.error('API request failed:', error);
-      console.warn('🎭 Falling back to demo mode due to backend connection failure');
-      this.demoMode = true;
+      clearTimeout(timeoutId); // Clear timeout on error
       
-      // Return demo data based on the endpoint
-      return this.getDemoResponse<T>(endpoint, options);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout - backend server not responding');
+      }
+      
+      // Don't fall back to demo mode - throw the actual error
+      throw error;
     }
   }
 
@@ -385,17 +394,12 @@ class ApiService {
       console.log('🔧 API Service login returning:', result);
       return result;
     } catch (error) {
-      console.error('🔧 Login failed, activating demo mode:', error);
-      this.demoMode = true;
+      console.error('🔧 Login failed:', error);
       
-      // Return demo login response
-      const demoUser = mockUsers.find(u => u.email === credentials.email) || mockUsers[0];
+      // Don't use demo mode - return actual error
       return {
-        success: true,
-        data: {
-          user: demoUser,
-          token: 'demo-token-' + Date.now()
-        }
+        success: false,
+        error: error.message || 'Login failed - please check your credentials and try again'
       };
     }
   }
@@ -821,6 +825,15 @@ class ApiService {
       body: JSON.stringify({
         action: 'markNotificationAsRead',
         id: notificationId
+      })
+    });
+  }
+
+  async markAllNotificationsAsRead(): Promise<ApiResponse> {
+    return this.makeRequest('?action=markAllNotificationsAsRead', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'markAllNotificationsAsRead'
       })
     });
   }

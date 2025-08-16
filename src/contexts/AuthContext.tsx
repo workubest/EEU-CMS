@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, UserRole, ROLE_PERMISSIONS, RolePermissions } from '@/types/user';
+import { dataPersistence } from '@/lib/persistence';
 
 interface AuthContextType {
   user: User | null;
@@ -20,18 +21,47 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<UserRole>('admin');
+  const [isLoading, setIsLoading] = useState(true);
 
   const permissions = ROLE_PERMISSIONS[role];
   const isAuthenticated = user !== null;
 
-  const login = (userData: User) => {
+  // Restore user session on app startup
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const cachedUser = await dataPersistence.getData('user_session');
+        if (cachedUser && cachedUser.user) {
+          console.log('👤 Restoring user session from cache');
+          setUser(cachedUser.user);
+          setRole(cachedUser.user.role);
+        }
+      } catch (error) {
+        console.error('❌ Failed to restore session:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    restoreSession();
+  }, []);
+
+  const login = async (userData: User) => {
     setUser(userData);
     setRole(userData.role);
+    
+    // Persist user session
+    await dataPersistence.saveData('user_session', { user: userData });
+    console.log('👤 User session saved');
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     setRole('call-attendant');
+    
+    // Clear all cached data
+    await dataPersistence.clearAll();
+    console.log('👋 User logged out - cache cleared');
   };
 
   const switchRole = (newRole: UserRole) => {
@@ -68,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hasPermission,
       canAccessRegion
     }}>
-      {children}
+      {!isLoading && children}
     </AuthContext.Provider>
   );
 }
